@@ -147,7 +147,10 @@
         <div id="quizPage" class="page">
             <button class="back-btn" onclick="goBackToUpload()">返回题库选择</button>
             
-            <div class="timer" id="timer">00:00:00</div>
+            <div style="display: flex; align-items: center; gap: 15px; justify-content: flex-end;">
+    <div class="timer" id="timer">00:00:00</div>
+    <button id="clearRecordBtn" class="nav-btn" style="padding: 6px 12px; font-size: 14px;">清除答题记录</button>
+</div>
             <div class="question-info">
                 <span id="questionNum">题目 #1</span>
                 <span id="totalQuestions">/ 0</span>
@@ -1042,6 +1045,50 @@
             }
         }
 
+        // 新增：清除答题记录功能
+function initClearRecordBtn() {
+    // 获取清除按钮DOM
+    const clearBtn = document.getElementById('clearRecordBtn');
+    if (!clearBtn) return;
+
+    // 绑定点击事件
+    clearBtn.addEventListener('click', function() {
+        // 二次确认，防止误操作
+        if (!confirm('确定要清除所有答题记录吗？此操作不可恢复！')) {
+            return;
+        }
+
+        // 重置答题相关状态
+        state.answers = {};
+        state.stats = { correct: 0, incorrect: 0, totalAttempted: 0, essayCompleted: 0 };
+        state.selectedOptions = [];
+        state.isAnswered = false;
+        state.isAnalysisShown = false;
+        state.isAnswerShown = false;
+
+        // 更新界面显示
+        updateStats();
+        updateQuestionDisplay();
+        DOM.analysisContainer.style.display = 'none';
+        DOM.answerRefContainer.style.display = 'none';
+
+        // 保存到本地存储
+        saveStorage();
+
+        // 提示用户
+        showToast('答题记录已全部清除！', 'success');
+    });
+}
+
+// 初始化清除按钮（加到init函数末尾）
+function init() {
+    // 原init函数内的所有代码保持不变...
+    
+    // 新增这一行：初始化清除答题记录按钮
+    initClearRecordBtn();
+    
+    showToast('系统已就绪！', 'info');
+}
         // 初始化应用
         window.addEventListener('load', init);
     </script>

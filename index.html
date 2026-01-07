@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>多功能智能刷题系统</title>
-    <link rel="icon" href="/favicon.png" type="image/png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Microsoft Yahei', sans-serif; }
         :root {
@@ -71,16 +70,17 @@
         .answer-input { width: 100%; min-height: 140px; padding: 16px; border-radius: 24px; border: 1px solid transparent; background: var(--essay-bg); color: var(--text); font-size: 1.1rem; line-height: 1.5; resize: none; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
         .answer-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px var(--essay-focus); }
         .answer-input::placeholder { color: #64748b; }
-        .answer-ref-container { display: none; flex-direction: column; gap: 12px; padding: 16px; background: var(--essay-bg); border-radius: 20px; margin-bottom: 20px; animation: fadeIn 0.3s ease; }
-        .answer-ref-title { font-size: 1.1rem; font-weight: 600; color: var(--text); }
-        .answer-ref-content { font-size: 1.1rem; line-height: 1.5; color: var(--text); }
+        /* 关键优化：给答案容器添加换行和间距样式 */
+        .answer-ref-container { display: none; flex-direction: column; gap: 12px; padding: 16px; background: var(--essay-bg); border-radius: 20px; margin-bottom: 20px; animation: fadeIn 0.3s ease; white-space: pre-line; line-height: 1.8; }
+        .answer-ref-title { font-size: 1.1rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+        .answer-ref-content { font-size: 1.1rem; color: var(--text); }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .submit-btn-area { text-align: center; margin-bottom: 30px; }
         .submit-btn { background: var(--success); color: white; font-weight: 600; padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 16px; }
         .analysis-btn-area { text-align: center; margin-bottom: 20px; }
         .analysis-btn { background: #6366f1; color: white; font-weight: 600; padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 16px; }
         .analysis-btn:disabled { background: var(--border); color: #94a3b8; cursor: not-allowed; }
-        .analysis-container { background: var(--analysis-bg); border-left: 4px solid var(--analysis-text); padding: 16px; border-radius: 6px; margin-bottom: 20px; display: none; font-size: 16px; color: var(--analysis-text); line-height: 1.8; }
+        .analysis-container { background: var(--analysis-bg); border-left: 4px solid var(--analysis-text); padding: 16px; border-radius: 6px; margin-bottom: 20px; display: none; font-size: 16px; color: var(--analysis-text); line-height: 1.8; white-space: pre-line; }
         .nav-buttons { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .nav-btn { background: var(--primary); color: white; padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 16px; }
         .nav-btn:disabled { background: var(--border); color: #94a3b8; cursor: not-allowed; }
@@ -262,7 +262,6 @@
             DOM.essayAnswerInput.addEventListener('input', () => {
                 const q = getCurrentQuestion();
                 if (q && q.type === 'essay') {
-                    DOM.nextBtn.disabled = false;
                     state.answers[q.id] = state.answers[q.id] || {};
                     state.answers[q.id].input = DOM.essayAnswerInput.value;
                 }
@@ -367,9 +366,9 @@
             DOM.fileInput.value = '';
         }
 
-        // 自动识别并解析题目
+        // 自动识别并解析题目 - 核心优化：保留简答题换行符
         function parseQuestions(text, fileName) {
-            const lines = text.replace(/\r\n/g, '\n').split('\n').map(l => l.trim()).filter(l => l);
+            const lines = text.replace(/\r\n/g, '\n').split('\n').map(l => l.trimEnd()).filter(l => l);
             const questions = [];
             let id = 1;
             
@@ -386,7 +385,7 @@
                             typeText: '简答题',
                             commonStem: '', 
                             question: essayBuffer.q.trim(), 
-                            answer: essayBuffer.a.trim(), 
+                            answer: essayBuffer.a,  // 不再trim，保留原始换行格式
                             analysis: ''
                         });
                     }
@@ -395,11 +394,12 @@
                 } 
                 // 简答题答案：A:开头
                 else if (line.startsWith('A:') && essayBuffer.q) {
-                    essayBuffer.a += line.slice(2).trim() + '\n';
+                    // 答案内容保留换行，用\n分隔多行
+                    essayBuffer.a += line.slice(2) + '\n';
                 }
-                // 简答题多行答案
+                // 简答题多行答案（续行）
                 else if (essayBuffer.q && essayBuffer.a) {
-                    essayBuffer.a += line.trim() + '\n';
+                    essayBuffer.a += line + '\n';
                 }
                 // 选择题格式（包含|分隔符）
                 else if (line.includes('|')) {
@@ -411,7 +411,7 @@
                             typeText: '简答题',
                             commonStem: '', 
                             question: essayBuffer.q.trim(), 
-                            answer: essayBuffer.a.trim(), 
+                            answer: essayBuffer.a,  // 保留换行
                             analysis: ''
                         });
                         essayBuffer = { q: '', a: '' };
@@ -449,7 +449,7 @@
                     typeText: '简答题',
                     commonStem: '', 
                     question: essayBuffer.q.trim(), 
-                    answer: essayBuffer.a.trim(), 
+                    answer: essayBuffer.a,  // 保留换行
                     analysis: ''
                 });
             }
@@ -681,7 +681,7 @@
             showToast('已返回题库选择页面', 'info');
         }
 
-        // 更新题目显示
+        // 更新题目显示 - 核心优化：渲染时保留换行符
         function updateQuestionDisplay() {
             const q = getCurrentQuestion();
             if (!q) return;
@@ -720,7 +720,7 @@
                 DOM.essayAnswerInput.value = state.answers[q.id]?.input || '';
                 DOM.nextBtn.disabled = !state.answers[q.id]?.input;
                 
-                // 恢复之前的答案显示状态
+                // 恢复之前的答案显示状态 - 直接赋值原始带换行的答案
                 if (state.answers[q.id]?.isCompleted || state.isAnswerShown) {
                     DOM.answerRefContent.textContent = q.answer;
                     DOM.answerRefContainer.style.display = 'flex';
@@ -888,6 +888,7 @@
                 state.isAnswerShown = !state.isAnswerShown;
                 
                 if (state.isAnswerShown) {
+                    // 直接赋值带换行的原始答案
                     DOM.answerRefContent.textContent = q.answer;
                     DOM.answerRefContainer.style.display = 'flex';
                     DOM.showAnalysisBtn.textContent = '🙈 隐藏参考答案';

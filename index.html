@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>多功能智能刷题系统 v1.5</title>
+    <title>多功能智能刷题系统</title>
     <style>
         /* ===== 基础样式与CSS变量 ===== */
         :root {
@@ -130,24 +130,54 @@
         .back-btn {
             padding: 10px 20px; border: none; border-radius: 8px;
             background: var(--bg-color); color: var(--text-color); cursor: pointer;
-            transition: var(--transition); margin-bottom: 20px;
+            transition: var(--transition);
         }
-        .timer { text-align: center; font-size: 1.5rem; font-weight: 600; color: var(--primary-color); margin-bottom: 20px; }
-        .question-info { text-align: center; margin-bottom: 15px; font-size: 1.1rem; }
+        /* 顶部导航栏布局调整 */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        .timer {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
         .question-type-tag {
-            display: inline-block; padding: 5px 15px; background: var(--primary-color);
-            color: white; border-radius: 20px; font-size: 0.85rem; margin-bottom: 20px;
+            display: inline-block;
+            padding: 5px 15px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
         }
+        .question-info {
+            margin-bottom: 25px; /* 增加间距 */
+        }
+        /* 题干样式优化 - 无底色、左对齐 */
         .question-content {
-            font-size: 1.0rem; line-height: 1.8; margin-bottom: 25px; padding: 20px;
-            background: var(--bg-color); border-radius: 8px; white-space: pre-wrap; word-wrap: break-word;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 30px; /* 增加与选项的间距 */
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            text-align: left;
         }
         
         /* 共用题干样式 */
         .common-stem-wrapper {
-            background: rgba(66, 153, 225, 0.1); border-left: 4px solid var(--primary-color);
-            padding: 15px; margin-bottom: 20px; border-radius: 4px;
-            font-size: 1.0rem; color: var(--text-color);
+            background: rgba(66, 153, 225, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            color: var(--text-color);
         }
 
         /* 进度条 */
@@ -157,27 +187,66 @@
             border-radius: 4px; transition: width 0.3s ease;
         }
 
-        /* 选项 */
-        .options-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
+        /* 选项样式优化 - 去掉圆形单选框、字母左对齐、轻微边框 */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* 增加选项间距 */
+            margin-bottom: 35px; /* 增加与按钮的间距 */
+        }
         .option-item {
-            display: flex; align-items: flex-start; padding: 15px 20px;
-            background: var(--bg-color); border: 2px solid transparent; border-radius: 8px;
-            cursor: pointer; transition: var(--transition);
+            display: flex;
+            align-items: flex-start;
+            padding: 18px 20px;
+            background: transparent; /* 取消浅灰背景 */
+            border: 2px solid var(--border-color); /* 轻微边框 */
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
         }
-        .option-item:hover:not(.disabled) { border-color: var(--primary-color); }
-        .option-item.selected { border-color: var(--primary-color); background: rgba(66, 153, 225, 0.1); }
-        .option-item.correct { border-color: var(--success-color); background: rgba(72, 187, 120, 0.1); }
-        .option-item.incorrect { border-color: var(--error-color); background: rgba(245, 101, 101, 0.1); }
+        .option-item:hover:not(.disabled) {
+            border-color: var(--primary-color);
+            background: rgba(66, 153, 225, 0.05);
+        }
+        .option-item.selected {
+            border-color: var(--primary-color);
+            background: rgba(66, 153, 225, 0.1);
+        }
+        .option-item.correct {
+            border-color: var(--success-color);
+            background: rgba(72, 187, 120, 0.1);
+        }
+        .option-item.incorrect {
+            border-color: var(--error-color);
+            background: rgba(245, 101, 101, 0.1);
+        }
         .option-item.disabled { cursor: not-allowed; }
+        /* 选项字母样式 - 去掉圆形背景，左对齐 */
         .option-label {
-            width: 30px; height: 30px; border: 2px solid var(--border-color); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; margin-right: 15px;
-            font-weight: 600; flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-right: 15px;
+            font-weight: 600;
+            flex-shrink: 0;
+            color: var(--primary-color);
         }
-        .option-item.selected .option-label { background: var(--primary-color); border-color: var(--primary-color); color: white; }
-        .option-item.correct .option-label { background: var(--success-color); border-color: var(--success-color); color: white; }
-        .option-item.incorrect .option-label { background: var(--error-color); border-color: var(--error-color); color: white; }
-        .option-text { flex: 1; line-height: 1.6; padding-top: 3px; }
+        .option-item.selected .option-label {
+            color: var(--primary-color);
+        }
+        .option-item.correct .option-label {
+            color: var(--success-color);
+        }
+        .option-item.incorrect .option-label {
+            color: var(--error-color);
+        }
+        .option-text {
+            flex: 1;
+            line-height: 1.6;
+            padding-top: 1px;
+        }
         /* 选项判断图标 */
         .option-result {
             margin-left: 10px;
@@ -190,65 +259,224 @@
         }
 
         /* 简答题优化 */
-        .essay-answer-container { display: none; margin-bottom: 25px; }
+        .essay-answer-container {
+            display: none;
+            margin-bottom: 35px; /* 增加间距 */
+        }
         .answer-input {
-            width: 100%; min-height: 80px; /* 减小高度 */
-            padding: 15px; border: 2px solid var(--border-color); border-radius: 8px;
-            font-size: 1rem; background: var(--bg-color); color: var(--text-color);
-            transition: var(--transition); resize: vertical;
+            width: 100%;
+            min-height: 80px;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: var(--transition);
+            resize: vertical;
         }
-        .answer-input:focus { outline: none; border-color: var(--primary-color); }
+        .answer-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
 
-        /* 底部按钮 */
-        .action-buttons { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 25px; }
-        .action-btn {
-            flex: 1; padding: 12px 20px; border: none; border-radius: 8px;
-            font-size: 1rem; font-weight: 500; cursor: pointer; transition: var(--transition);
+        /* 底部操作栏优化 */
+        .submit-section {
+            margin-bottom: 20px;
+            text-align: center;
         }
-        .action-btn.primary { background: var(--primary-color); color: white; }
-        .action-btn.secondary { background: var(--bg-color); color: var(--text-color); }
-        .action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .submit-btn {
+            padding: 12px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--primary-color);
+            color: white;
+            width: auto;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            min-width: 120px;
+        }
+        .action-btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        .action-btn.secondary {
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
         /* 解析 */
         .analysis-container {
-            background: var(--bg-color); border-radius: 8px; padding: 20px;
-            margin-bottom: 20px; display: none;
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+            margin-top: 20px;
         }
-        .analysis-title { font-weight: 600; margin-bottom: 10px; color: var(--primary-color); }
-        .analysis-content { line-height: 1.8; white-space: pre-wrap; }
+        .analysis-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        .analysis-content {
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
 
         /* 错题本与结算 */
-        .wrong-questions-page { background: var(--card-bg); border-radius: var(--radius); padding: 30px; }
-        .wrong-question-item { background: var(--bg-color); border-radius: 8px; padding: 20px; border-left: 4px solid var(--error-color); margin-bottom: 15px; }
-        .wrong-question-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .wrong-answer-row { display: flex; gap: 10px; margin-bottom: 5px; }
-        .stats-section { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
-        .stat-card { background: var(--bg-color); padding: 15px; text-align: center; border-radius: 8px; }
-        .stat-value { font-size: 1.5rem; font-weight: bold; display: block; }
-        .stat-value.correct { color: var(--success-color); }
-        .stat-value.incorrect { color: var(--error-color); }
+        .wrong-questions-page {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 30px;
+        }
+        .wrong-question-item {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid var(--error-color);
+            margin-bottom: 15px;
+        }
+        .wrong-question-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .wrong-answer-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-card {
+            background: var(--bg-color);
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: block;
+        }
+        .stat-value.correct {
+            color: var(--success-color);
+        }
+        .stat-value.incorrect {
+            color: var(--error-color);
+        }
 
         /* Toast & Modal */
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1001; }
-        .toast { padding: 15px 25px; background: rgba(0,0,0,0.8); color: white; border-radius: 8px; margin-bottom: 10px; animation: slideIn 0.3s; }
-        .toast.success { background: var(--success-color); }
-        .toast.error { background: var(--error-color); }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
+        .toast {
+            padding: 15px 25px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            animation: slideIn 0.3s;
+        }
+        .toast.success {
+            background: var(--success-color);
+        }
+        .toast.error {
+            background: var(--error-color);
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
         
         .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5); display: flex; align-items: center;
-            justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
         }
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-content { background: var(--card-bg); padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
-        .modal-buttons { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
-        .modal-btn { padding: 10px 25px; border-radius: 6px; border: none; cursor: pointer; }
-        .modal-btn.confirm { background: var(--primary-color); color: white; }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .modal-btn {
+            padding: 10px 25px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        .modal-btn.confirm {
+            background: var(--primary-color);
+            color: white;
+        }
 
         @media (max-width: 768px) {
-            .stats-section { grid-template-columns: 1fr 1fr; }
-            .action-buttons { flex-direction: column; }
+            .stats-section {
+                grid-template-columns: 1fr 1fr;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+            .nav-buttons {
+                flex-wrap: wrap;
+            }
+            .timer {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
@@ -299,8 +527,10 @@
 
         <div id="quizPage" class="page">
             <div class="quiz-page">
+                <!-- 顶部导航栏重构 - 退出按钮 + 题型标签 + 计时器 -->
                 <div class="nav-buttons">
                     <button id="quitQuizBtn" class="back-btn">退出答题</button>
+                    <span id="questionType" class="question-type-tag">单选题</span>
                     <div class="timer" id="timer">00:00</div>
                 </div>
                 
@@ -315,9 +545,7 @@
                 </div>
 
                 <div id="questionContainer">
-                    <div class="question-info">
-                        <span id="questionType" class="question-type-tag">单选题</span>
-                    </div>
+                    <div class="question-info"></div>
                     <div id="questionContent" class="question-content"></div>
                     
                     <div id="optionsContainer" class="options-container"></div>
@@ -326,10 +554,15 @@
                         <textarea id="essayInput" class="answer-input" placeholder="可以在此输入关键词（非必填）..."></textarea>
                     </div>
 
+                    <!-- 提交按钮单独区域 -->
+                    <div class="submit-section">
+                        <button id="submitBtn" class="submit-btn primary">提交答案</button>
+                    </div>
+                    
+                    <!-- 上下题按钮布局调整 -->
                     <div class="action-buttons">
                         <button id="prevBtn" class="action-btn secondary">上一题</button>
-                        <button id="submitBtn" class="action-btn primary">提交答案</button>
-                        <button id="nextBtn" class="action-btn secondary" disabled>下一题</button>
+                        <button id="nextBtn" class="action-btn primary">下一题</button>
                     </div>
 
                     <div id="analysisContainer" class="analysis-container">
@@ -425,7 +658,8 @@
         timerInterval: null,
         theme: 'light',
         isDragging: false,     // 进度条拖拽状态
-        isAutoNexting: false   // 是否正在自动跳转
+        isAutoNexting: false,  // 是否正在自动跳转
+        isAnswered: false      // 当前题目是否已作答
     };
 
     // ===== DOM 元素获取 =====
@@ -451,7 +685,7 @@
         essayInput: document.getElementById('essayInput'),
         submitBtn: document.getElementById('submitBtn'),
         nextBtn: document.getElementById('nextBtn'),
-        prevBtn: document.getElementById('prevBtn'), // 新增上一题按钮
+        prevBtn: document.getElementById('prevBtn'),
         quitQuizBtn: document.getElementById('quitQuizBtn'),
         analysisContainer: document.getElementById('analysisContainer'),
         analysisContent: document.getElementById('analysisContent'),
@@ -678,272 +912,291 @@
         });
         elements.startQuizBtn.disabled = state.currentQuizIndex === -1;
     }
-    function selectQuiz(idx) { state.currentQuizIndex = idx; renderQuizList(); }
+    function selectQuiz(idx) { 
+        state.currentQuizIndex = idx; 
+        renderQuizList(); 
+    }
     window.deleteQuiz = function(idx) {
-        showModal('确认删除', '确定要删除这个题库吗？', () => {
+        showModal('确认删除', `确定要删除题库 "${state.quizzes[idx].name}" 吗？`, () => {
             state.quizzes.splice(idx, 1);
-            if(state.currentQuizIndex === idx) state.currentQuizIndex = -1;
-            saveData(); renderQuizList();
+            if (state.currentQuizIndex === idx) state.currentQuizIndex = -1;
+            saveData();
+            renderQuizList();
+            showToast('题库已删除', 'success');
         });
     };
 
     // ===== 答题逻辑 =====
-    elements.startQuizBtn.addEventListener('click', () => {
-        if(state.currentQuizIndex === -1) return;
-        startQuiz(state.quizzes[state.currentQuizIndex].questions);
+    elements.startQuizBtn.addEventListener('click', startQuiz);
+    elements.quitQuizBtn.addEventListener('click', () => {
+        showModal('退出答题', '确定要退出当前答题吗？进度将被重置', () => {
+            stopTimer();
+            resetQuizState();
+            elements.uploadPage.classList.add('active');
+            elements.quizPage.classList.remove('active');
+        });
     });
 
-    function startQuiz(questions) {
-        state.questions = JSON.parse(JSON.stringify(questions));
-        state.currentQuestionIndex = 0;
-        state.score = 0; state.correctCount = 0; state.wrongCount = 0; state.timer = 0;
-        state.userAnswers = {};
+    function startQuiz() {
+        if (state.currentQuizIndex === -1) return;
+        const quiz = state.quizzes[state.currentQuizIndex];
+        state.questions = [...quiz.questions];
+        resetQuizState();
         
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        elements.uploadPage.classList.remove('active');
         elements.quizPage.classList.add('active');
-        elements.resultContainer.style.display = 'none';
-        elements.questionContainer.style.display = 'block';
         
         startTimer();
         renderQuestion();
-        updateNavButtons(); // 更新导航按钮状态
+        updateProgress();
+    }
+
+    function resetQuizState() {
+        state.userAnswers = {};
+        state.currentQuestionIndex = 0;
+        state.score = 0;
+        state.correctCount = 0;
+        state.wrongCount = 0;
+        state.timer = 0;
+        state.isAnswered = false;
+        stopTimer();
+    }
+
+    function startTimer() {
+        stopTimer();
+        state.timerInterval = setInterval(() => {
+            state.timer++;
+            const minutes = Math.floor(state.timer / 60).toString().padStart(2, '0');
+            const seconds = (state.timer % 60).toString().padStart(2, '0');
+            elements.timer.textContent = `${minutes}:${seconds}`;
+        }, 1000);
+    }
+
+    function stopTimer() {
+        if (state.timerInterval) clearInterval(state.timerInterval);
+        state.timerInterval = null;
     }
 
     function renderQuestion() {
-        // 取消正在进行的自动跳转
-        if(state.isAutoNexting) {
-            clearTimeout(state.isAutoNexting);
-            state.isAutoNexting = false;
+        if (state.currentQuestionIndex >= state.questions.length) {
+            showResult();
+            return;
         }
-        
-        const q = state.questions[state.currentQuestionIndex];
-        const userRec = state.userAnswers[state.currentQuestionIndex] || {};
-        
-        // 更新进度
-        const total = state.questions.length;
-        elements.progressText.textContent = `进度: ${state.currentQuestionIndex + 1}/${total}`;
-        elements.scoreText.textContent = `得分: ${state.score}`;
-        elements.progressBar.style.width = `${((state.currentQuestionIndex + 1) / total) * 100}%`;
 
-        // 渲染题干 (含共用题干)
-        let html = '';
-        if(q.commonStem) html += `<div class="common-stem-wrapper"><strong>背景：</strong>${q.commonStem}</div>`;
-        html += q.content;
-        elements.questionContent.innerHTML = html;
-        elements.questionType.textContent = q.typeText;
-
-        // UI重置
-        elements.analysisContainer.style.display = 'none';
+        const question = state.questions[state.currentQuestionIndex];
+        state.isAnswered = !!state.userAnswers[state.currentQuestionIndex];
+        
+        // 重置UI状态
         elements.optionsContainer.innerHTML = '';
-        const hasAnswered = !!userRec.isAnswered;
+        elements.essayContainer.style.display = 'none';
+        elements.analysisContainer.style.display = 'none';
+        elements.submitBtn.style.display = 'block';
         
-        // 更新按钮显示状态
-        elements.submitBtn.style.display = hasAnswered ? 'none' : 'block';
-        elements.nextBtn.style.display = 'block'; // 始终显示下一题按钮
-        elements.nextBtn.disabled = !hasAnswered; // 根据是否答题禁用/启用
+        // 更新题型标签
+        elements.questionType.textContent = question.typeText;
         
-        // 更新上一题按钮状态
-        updateNavButtons();
-
-        if(hasAnswered && q.type !== 'essay') {
-            elements.analysisContainer.style.display = 'block';
-            elements.analysisContent.textContent = q.analysis;
+        // 渲染共用题干
+        let questionHtml = '';
+        if (question.commonStem) {
+            questionHtml += `<div class="common-stem-wrapper">${question.commonStem}</div>`;
         }
-
-        if(q.type === 'essay') {
-            elements.optionsContainer.style.display = 'none';
-            elements.essayContainer.style.display = 'block';
-            elements.essayInput.value = userRec.input || '';
-            // 简答题按钮逻辑优化
-            elements.submitBtn.textContent = hasAnswered ? '已查看答案' : '查看参考答案';
-            if(hasAnswered) {
-                elements.analysisContainer.style.display = 'block';
-                elements.analysisContent.textContent = `参考答案：\n${q.answer}`;
-            }
-        } else {
-            elements.optionsContainer.style.display = 'flex';
-            elements.essayContainer.style.display = 'none';
-            elements.submitBtn.textContent = '提交答案';
-            
-            q.options.forEach((opt, idx) => {
+        questionHtml += question.content;
+        elements.questionContent.innerHTML = questionHtml;
+        
+        // 渲染选项（选择题/多选题）
+        if (question.type === 'choice' || question.type === 'multiple') {
+            question.options.forEach((option, idx) => {
                 const optionLetter = CONST.ANSWER_OPTIONS[idx];
+                const isSelected = state.userAnswers[state.currentQuestionIndex]?.includes(optionLetter) || false;
+                const isCorrect = question.correctAnswers.includes(optionLetter);
+                const isIncorrect = state.isAnswered && isSelected && !isCorrect;
+                
                 const optionItem = document.createElement('div');
-                optionItem.className = `option-item ${userRec.selected === optionLetter ? 'selected' : ''}`;
-                
-                // 添加判断状态类和图标
-                if(hasAnswered) {
-                    if(q.correctAnswers.includes(optionLetter)) {
-                        optionItem.classList.add('correct');
-                    } else if(userRec.selected === optionLetter && !q.correctAnswers.includes(optionLetter)) {
-                        optionItem.classList.add('incorrect');
-                    }
-                    optionItem.classList.add('disabled');
-                }
-                
+                optionItem.className = `option-item ${isSelected ? 'selected' : ''} ${state.isAnswered ? (isCorrect ? 'correct' : (isIncorrect ? 'incorrect' : '')) : ''} ${state.isAnswered ? 'disabled' : ''}`;
                 optionItem.innerHTML = `
                     <div class="option-label">${optionLetter}</div>
-                    <div class="option-text">${opt}</div>
-                    <div class="option-result">
-                        ${q.correctAnswers.includes(optionLetter) ? CONST.CORRECT_ICON : 
-                          (userRec.selected === optionLetter && !q.correctAnswers.includes(optionLetter)) ? CONST.INCORRECT_ICON : ''}
-                    </div>
+                    <div class="option-text">${option}</div>
+                    <div class="option-result">${isCorrect ? CONST.CORRECT_ICON : (isIncorrect ? CONST.INCORRECT_ICON : '')}</div>
                 `;
                 
-                // 单选题秒选秒判逻辑
-                if(!hasAnswered && q.type === 'choice') {
+                if (!state.isAnswered) {
                     optionItem.addEventListener('click', () => {
-                        checkAnswer(optionLetter);
-                    });
-                }
-                
-                // 多选题仍需点击提交
-                if(!hasAnswered && q.type === 'multiple') {
-                    optionItem.addEventListener('click', () => {
-                        optionItem.classList.toggle('selected');
+                        if (question.type === 'choice') {
+                            // 单选题 - 单选
+                            Array.from(elements.optionsContainer.children).forEach(item => {
+                                item.classList.remove('selected');
+                            });
+                            optionItem.classList.add('selected');
+                        } else {
+                            // 多选题 - 多选
+                            optionItem.classList.toggle('selected');
+                        }
                     });
                 }
                 
                 elements.optionsContainer.appendChild(optionItem);
             });
-        }
-    }
-
-    // 更新导航按钮状态（上一题/下一题）
-    function updateNavButtons() {
-        const total = state.questions.length;
-        // 上一题按钮：第一题禁用
-        elements.prevBtn.disabled = state.currentQuestionIndex === 0;
-        // 下一题按钮：最后一题且已答题则禁用
-        elements.nextBtn.disabled = !state.userAnswers[state.currentQuestionIndex]?.isAnswered || 
-                                  state.currentQuestionIndex === total - 1;
-    }
-
-    // 检查答案（秒选秒判核心逻辑）
-    function checkAnswer(selectedOption) {
-        const qIdx = state.currentQuestionIndex;
-        const q = state.questions[qIdx];
-        
-        // 标记已答题
-        state.userAnswers[qIdx] = {
-            selected: selectedOption,
-            isAnswered: true,
-            input: q.type === 'essay' ? elements.essayInput.value : ''
-        };
-        
-        const isCorrect = q.correctAnswers.includes(selectedOption);
-        
-        // 更新得分和统计
-        if(isCorrect) {
-            state.score += 1;
-            state.correctCount += 1;
+        } 
+        // 渲染简答题
+        else if (question.type === 'essay') {
+            elements.essayContainer.style.display = 'block';
+            elements.essayInput.value = state.userAnswers[state.currentQuestionIndex] || '';
+            // 简答题提交按钮改为显示解析
+            elements.submitBtn.textContent = '查看解析';
+            // 简答题上下题按钮无限制
+            elements.prevBtn.disabled = false;
+            elements.nextBtn.disabled = false;
         } else {
-            state.wrongCount += 1;
-            // 添加到错题本
-            state.wrongQuestions.push({
-                ...q,
-                userAnswer: selectedOption,
-                time: new Date().toLocaleString()
-            });
-            saveData();
+            elements.submitBtn.textContent = '提交答案';
         }
-        
-        // 重新渲染题目显示判断结果
-        renderQuestion();
-        
-        // 答对：1秒后自动下一题
-        if(isCorrect) {
-            state.isAutoNexting = setTimeout(() => {
-                nextQuestion();
-            }, CONST.AUTO_NEXT_DELAY);
-        } else {
-            // 答错：展开解析，不自动跳转
-            elements.analysisContainer.style.display = 'block';
-            elements.analysisContent.textContent = q.analysis;
-        }
-        
-        saveData();
-    }
 
-    // 提交答案（多选题/简答题）
-    elements.submitBtn.addEventListener('click', () => {
-        const qIdx = state.currentQuestionIndex;
-        const q = state.questions[qIdx];
-        
-        if(q.type === 'multiple') {
-            // 多选题获取选中选项
-            const selectedOptions = [];
-            document.querySelectorAll('.option-item.selected').forEach((item, idx) => {
-                selectedOptions.push(CONST.ANSWER_OPTIONS[idx]);
-            });
-            
-            if(selectedOptions.length === 0) {
-                showToast('请选择至少一个选项', 'error');
-                return;
+        // 更新提交按钮状态
+        if (state.isAnswered) {
+            elements.submitBtn.style.display = 'none';
+            // 如果是答错的单选题，自动展开解析
+            if (question.type === 'choice' && !isAnswerCorrect()) {
+                elements.analysisContainer.style.display = 'block';
+                elements.analysisContent.textContent = question.analysis || '暂无解析';
             }
+        } else {
+            elements.submitBtn.textContent = question.type === 'essay' ? '查看解析' : '提交答案';
+        }
+
+        // 更新上下题按钮状态（非简答题按原有逻辑，简答题无限制）
+        if (question.type !== 'essay') {
+            elements.prevBtn.disabled = state.currentQuestionIndex === 0;
+            elements.nextBtn.disabled = state.isAnswered ? false : true;
+        } else {
+            elements.prevBtn.disabled = false;
+            elements.nextBtn.disabled = false;
+        }
+    }
+
+    function updateProgress() {
+        const progress = ((state.currentQuestionIndex + 1) / state.questions.length) * 100;
+        elements.progressBar.style.width = `${progress}%`;
+        elements.progressText.textContent = `进度: ${state.currentQuestionIndex + 1}/${state.questions.length}`;
+        elements.scoreText.textContent = `得分: ${state.score}`;
+    }
+
+    function getSelectedAnswers() {
+        const selectedOptions = Array.from(elements.optionsContainer.querySelectorAll('.option-item.selected'));
+        return selectedOptions.map(item => {
+            return item.querySelector('.option-label').textContent;
+        });
+    }
+
+    function isAnswerCorrect() {
+        const question = state.questions[state.currentQuestionIndex];
+        const userAnswer = state.userAnswers[state.currentQuestionIndex] || [];
+        
+        if (question.type === 'essay') return true; // 简答题不判断对错
+        
+        // 检查答案是否正确
+        if (userAnswer.length !== question.correctAnswers.length) return false;
+        return question.correctAnswers.every(ans => userAnswer.includes(ans));
+    }
+
+    function submitAnswer() {
+        const question = state.questions[state.currentQuestionIndex];
+        state.isAnswered = true;
+        
+        // 处理不同题型
+        if (question.type === 'choice' || question.type === 'multiple') {
+            // 选择题/多选题
+            const selectedAnswers = getSelectedAnswers();
+            state.userAnswers[state.currentQuestionIndex] = selectedAnswers;
             
-            // 检查多选题答案
-            const isCorrect = JSON.stringify(selectedOptions.sort()) === JSON.stringify(q.correctAnswers.sort());
+            // 标记正确/错误选项
+            question.options.forEach((option, idx) => {
+                const optionLetter = CONST.ANSWER_OPTIONS[idx];
+                const optionItem = elements.optionsContainer.children[idx];
+                const isCorrect = question.correctAnswers.includes(optionLetter);
+                const isSelected = selectedAnswers.includes(optionLetter);
+                
+                optionItem.classList.remove('selected');
+                optionItem.classList.add('disabled');
+                
+                if (isCorrect) {
+                    optionItem.classList.add('correct');
+                    optionItem.querySelector('.option-result').textContent = CONST.CORRECT_ICON;
+                } else if (isSelected && !isCorrect) {
+                    optionItem.classList.add('incorrect');
+                    optionItem.querySelector('.option-result').textContent = CONST.INCORRECT_ICON;
+                }
+            });
             
-            state.userAnswers[qIdx] = {
-                selected: selectedOptions.join(','),
-                isAnswered: true
-            };
-            
-            if(isCorrect) {
-                state.score += 1;
-                state.correctCount += 1;
+            // 判断对错
+            const correct = isAnswerCorrect();
+            if (correct) {
+                state.correctCount++;
+                state.score += 10; // 每题10分
+                // 单选题答对 - 1秒后自动下一题
+                if (question.type === 'choice') {
+                    setTimeout(() => {
+                        if (!state.isAutoNexting) {
+                            state.isAutoNexting = true;
+                            nextQuestion();
+                            state.isAutoNexting = false;
+                        }
+                    }, CONST.AUTO_NEXT_DELAY);
+                }
             } else {
-                state.wrongCount += 1;
-                state.wrongQuestions.push({
-                    ...q,
-                    userAnswer: selectedOptions.join(','),
-                    time: new Date().toLocaleString()
-                });
-                saveData();
+                state.wrongCount++;
+                // 答错 - 自动展开解析，不自动跳转
+                elements.analysisContainer.style.display = 'block';
+                elements.analysisContent.textContent = question.analysis || '暂无解析';
+                // 加入错题本
+                addToWrongQuestions();
             }
-            
-            renderQuestion();
+        } 
+        // 简答题 - 显示解析，不自动跳转
+        else if (question.type === 'essay') {
+            state.userAnswers[state.currentQuestionIndex] = elements.essayInput.value;
             elements.analysisContainer.style.display = 'block';
-            elements.analysisContent.textContent = q.analysis;
-            
-        } else if(q.type === 'essay') {
-            // 简答题：无需验证，直接标记已答题
-            state.userAnswers[qIdx] = {
-                input: elements.essayInput.value,
-                isAnswered: true
-            };
-            
-            renderQuestion();
+            elements.analysisContent.textContent = question.answer || '暂无参考答案';
         }
         
+        // 更新UI
+        elements.submitBtn.style.display = 'none';
+        elements.nextBtn.disabled = false; // 答错时允许手动下一题
+        updateProgress();
+    }
+
+    function addToWrongQuestions() {
+        const question = state.questions[state.currentQuestionIndex];
+        const userAnswer = state.userAnswers[state.currentQuestionIndex];
+        
+        state.wrongQuestions.push({
+            id: Date.now() + Math.random(),
+            question: question,
+            userAnswer: userAnswer,
+            quizName: state.quizzes[state.currentQuizIndex].name,
+            time: new Date().toLocaleString()
+        });
         saveData();
-        updateNavButtons();
-    });
+    }
 
-    // 上一题
-    elements.prevBtn.addEventListener('click', () => {
-        if(state.currentQuestionIndex > 0) {
-            state.currentQuestionIndex -= 1;
+    function prevQuestion() {
+        if (state.currentQuestionIndex > 0) {
+            state.currentQuestionIndex--;
             renderQuestion();
+            updateProgress();
         }
-    });
+    }
 
-    // 下一题
-    elements.nextBtn.addEventListener('click', nextQuestion);
-    
     function nextQuestion() {
-        if(state.currentQuestionIndex < state.questions.length - 1) {
-            state.currentQuestionIndex += 1;
+        if (state.currentQuestionIndex < state.questions.length - 1) {
+            state.currentQuestionIndex++;
             renderQuestion();
+            updateProgress();
         } else {
-            // 最后一题，显示结果
             showResult();
         }
     }
 
-    // 显示答题结果
     function showResult() {
-        clearInterval(state.timerInterval);
+        stopTimer();
         elements.questionContainer.style.display = 'none';
         elements.resultContainer.style.display = 'block';
         
@@ -953,137 +1206,124 @@
         elements.resultScore.textContent = state.score;
     }
 
-    // 退出答题
-    elements.quitQuizBtn.addEventListener('click', () => {
-        showModal('确认退出', '退出后将丢失本次答题进度，确定吗？', () => {
-            clearInterval(state.timerInterval);
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    // ===== 事件监听 =====
+    function setupEventListeners() {
+        // 提交答案
+        elements.submitBtn.addEventListener('click', submitAnswer);
+        
+        // 上下题
+        elements.prevBtn.addEventListener('click', prevQuestion);
+        elements.nextBtn.addEventListener('click', nextQuestion);
+        
+        // 结果页面按钮
+        elements.restartBtn.addEventListener('click', startQuiz);
+        elements.homeBtn.addEventListener('click', () => {
+            elements.resultContainer.style.display = 'none';
+            elements.questionContainer.style.display = 'block';
+            elements.quizPage.classList.remove('active');
             elements.uploadPage.classList.add('active');
+            resetQuizState();
         });
-    });
-
-    // 再来一次
-    elements.restartBtn.addEventListener('click', () => {
-        startQuiz(state.questions);
-    });
-
-    // 返回主页
-    elements.homeBtn.addEventListener('click', () => {
-        clearInterval(state.timerInterval);
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        elements.uploadPage.classList.add('active');
-    });
-
-    // 错题本
-    elements.wrongBookBtn.addEventListener('click', () => {
-        renderWrongQuestions();
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        elements.wrongPage.classList.add('active');
-    });
-
-    // 返回主页（从错题本）
-    elements.backFromWrongBtn.addEventListener('click', () => {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        elements.uploadPage.classList.add('active');
-    });
-
-    // 清空错题本
-    elements.clearWrongBtn.addEventListener('click', () => {
-        showModal('清空错题本', '确定要清空所有错题记录吗？此操作不可恢复！', () => {
-            state.wrongQuestions = [];
-            saveData();
+        
+        // 错题本
+        elements.wrongBookBtn.addEventListener('click', () => {
+            elements.uploadPage.classList.remove('active');
+            elements.wrongPage.classList.add('active');
             renderWrongQuestions();
         });
-    });
+        
+        elements.backFromWrongBtn.addEventListener('click', () => {
+            elements.wrongPage.classList.remove('active');
+            elements.uploadPage.classList.add('active');
+        });
+        
+        elements.clearWrongBtn.addEventListener('click', () => {
+            showModal('清空错题本', '确定要清空所有错题记录吗？', () => {
+                state.wrongQuestions = [];
+                saveData();
+                renderWrongQuestions();
+                showToast('错题本已清空', 'success');
+            });
+        });
+        
+        // 模态框
+        elements.modalCancel.addEventListener('click', () => {
+            elements.confirmModal.classList.remove('active');
+        });
+        
+        // 进度条点击跳转
+        elements.progressSection.addEventListener('click', (e) => {
+            const rect = elements.progressSection.getBoundingClientRect();
+            const clickPos = (e.clientX - rect.left) / rect.width;
+            const newIndex = Math.floor(clickPos * state.questions.length);
+            if (newIndex >= 0 && newIndex < state.questions.length) {
+                state.currentQuestionIndex = newIndex;
+                renderQuestion();
+                updateProgress();
+            }
+        });
+    }
 
-    // 渲染错题本
+    // ===== 错题本渲染 =====
     function renderWrongQuestions() {
-        if(state.wrongQuestions.length === 0) {
-            elements.wrongList.style.display = 'none';
+        if (state.wrongQuestions.length === 0) {
             elements.emptyWrong.style.display = 'block';
+            elements.wrongList.innerHTML = '';
             return;
         }
         
         elements.emptyWrong.style.display = 'none';
         elements.wrongList.innerHTML = '';
         
-        state.wrongQuestions.forEach((q, idx) => {
-            const item = document.createElement('div');
-            item.className = 'wrong-question-item';
+        state.wrongQuestions.forEach((wrongItem, idx) => {
+            const question = wrongItem.question;
+            const userAnswer = wrongItem.userAnswer;
             
-            let content = `<div class="wrong-question-header">
-                <span>${idx + 1}. ${q.typeText}</span>
-                <span>${q.time}</span>
+            let wrongHtml = `
+                <div class="wrong-question-item">
+                    <div class="wrong-question-header">
+                        <span>${idx + 1}. ${question.typeText}</span>
+                        <span>${wrongItem.time}</span>
+                    </div>
+                    <div class="wrong-question-content" style="margin-bottom: 10px;">${question.content}</div>
+            `;
+            
+            // 显示用户答案和正确答案
+            wrongHtml += `<div class="wrong-answer-row">
+                <span style="color: var(--error-color);">你的答案：</span>
+                <span>${Array.isArray(userAnswer) ? userAnswer.join(',') : userAnswer || '未作答'}</span>
             </div>`;
             
-            if(q.commonStem) {
-                content += `<div class="common-stem-wrapper"><strong>背景：</strong>${q.commonStem}</div>`;
-            }
-            
-            content += `<div class="question-content" style="margin: 10px 0;">${q.content}</div>`;
-            
-            if(q.options.length > 0) {
-                content += `<div class="options-container" style="margin: 10px 0;">`;
-                q.options.forEach((opt, i) => {
-                    const letter = CONST.ANSWER_OPTIONS[i];
-                    const isCorrect = q.correctAnswers.includes(letter);
-                    const isUserAnswer = q.userAnswer.includes(letter);
-                    
-                    content += `<div class="option-item ${isCorrect ? 'correct' : isUserAnswer ? 'incorrect' : ''}">
-                        <div class="option-label">${letter}</div>
-                        <div class="option-text">${opt}</div>
-                        <div class="option-result">
-                            ${isCorrect ? CONST.CORRECT_ICON : isUserAnswer ? CONST.INCORRECT_ICON : ''}
-                        </div>
-                    </div>`;
-                });
-                content += `</div>`;
-            }
-            
-            content += `<div class="wrong-answer-row">
-                <strong>你的答案：</strong> ${q.userAnswer || '未作答'}
-            </div>`;
-            content += `<div class="wrong-answer-row">
-                <strong>正确答案：</strong> ${q.answer || '无'}
-            </div>`;
-            content += `<div class="analysis-container" style="display:block; margin-top:10px">
-                <div class="analysis-title">💡 答案解析</div>
-                <div class="analysis-content">${q.analysis}</div>
+            wrongHtml += `<div class="wrong-answer-row">
+                <span style="color: var(--success-color);">正确答案：</span>
+                <span>${Array.isArray(question.correctAnswers) ? question.correctAnswers.join(',') : question.answer || '无'}</span>
             </div>`;
             
-            item.innerHTML = content;
-            elements.wrongList.appendChild(item);
+            // 显示解析
+            wrongHtml += `<div style="margin-top: 10px;">
+                <div class="analysis-title">解析：</div>
+                <div class="analysis-content">${question.analysis || '暂无解析'}</div>
+            </div>`;
+            
+            wrongHtml += `</div>`;
+            elements.wrongList.innerHTML += wrongHtml;
         });
     }
 
-    // ===== 计时器 =====
-    function startTimer() {
-        clearInterval(state.timerInterval);
-        state.timerInterval = setInterval(() => {
-            state.timer++;
-            const minutes = Math.floor(state.timer / 60).toString().padStart(2, '0');
-            const seconds = (state.timer % 60).toString().padStart(2, '0');
-            elements.timer.textContent = `${minutes}:${seconds}`;
-        }, 1000);
-    }
-
-    // ===== 弹窗与提示 =====
+    // ===== 工具函数 =====
     function showModal(title, message, confirmCallback) {
         elements.modalTitle.textContent = title;
         elements.modalMessage.textContent = message;
         elements.confirmModal.classList.add('active');
         
+        // 重新绑定确认事件
         elements.modalConfirm.onclick = () => {
             elements.confirmModal.classList.remove('active');
             confirmCallback();
         };
-        
-        elements.modalCancel.onclick = () => {
-            elements.confirmModal.classList.remove('active');
-        };
     }
 
-    function showToast(message, type = 'success') {
+    function showToast(message, type = 'info') {
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         toast.textContent = message;
@@ -1091,44 +1331,10 @@
         
         setTimeout(() => {
             toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 300);
+            setTimeout(() => {
+                elements.toastContainer.removeChild(toast);
+            }, 300);
         }, 3000);
-    }
-
-    // ===== 事件监听 =====
-    function setupEventListeners() {
-        // 进度条点击跳转
-        elements.progressSection.addEventListener('click', (e) => {
-            if(state.questions.length === 0) return;
-            const rect = elements.progressSection.getBoundingClientRect();
-            const percent = (e.clientX - rect.left) / rect.width;
-            const newIndex = Math.min(
-                state.questions.length - 1,
-                Math.max(0, Math.floor(percent * state.questions.length))
-            );
-            state.currentQuestionIndex = newIndex;
-            renderQuestion();
-        });
-        
-        // 阻止进度条拖拽
-        elements.progressSection.addEventListener('mousedown', () => {
-            state.isDragging = true;
-        });
-        document.addEventListener('mouseup', () => {
-            state.isDragging = false;
-        });
-        document.addEventListener('mousemove', (e) => {
-            if(state.isDragging) {
-                const rect = elements.progressSection.getBoundingClientRect();
-                const percent = (e.clientX - rect.left) / rect.width;
-                const newIndex = Math.min(
-                    state.questions.length - 1,
-                    Math.max(0, Math.floor(percent * state.questions.length))
-                );
-                state.currentQuestionIndex = newIndex;
-                renderQuestion();
-            }
-        });
     }
 </script>
 </body>

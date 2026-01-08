@@ -571,7 +571,7 @@
                         <strong>支持格式 (TXT)：</strong><br>
                         1. <strong>A/X型选择题</strong>：题干|选项A|...|选项N|答案|解析<br>
                         2. <strong>B/综合题</strong>：共用题干|小题1|选项...|答案|小题2...<br>
-                        3. <strong>简答题</strong>：Q:问题 (换行) A:答案
+                        3. <strong>简答题</strong>：Q:问题 (换行) A:答案 (可多行)
                     </p>
                     <div class="upload-zone" id="uploadZone">
                         <div class="upload-icon">📁</div>
@@ -722,18 +722,18 @@
         quizzes: [],           // 题库列表
         currentQuizIndex: -1,  // 当前题库索引
         questions: [],         // 当前题目列表
-        userAnswers: {},       // 用户作答记录
+        userAnswers: {},       // 用户作答记录（仅记录选择题）
         currentQuestionIndex: 0,
         score: 0,
         correctCount: 0,
         wrongCount: 0,
-        wrongQuestions: [],    // 错题集
+        wrongQuestions: [],    // 错题集（仅选择题）
         timer: 0,
         timerInterval: null,
         theme: 'light',
         isDragging: false,     // 进度条拖拽状态
         isAutoNexting: false,  // 是否正在自动跳转
-        isAnswered: false      // 当前题目是否已作答
+        isAnswered: false      // 当前题目是否已作答（仅选择题）
     };
 
     // ===== DOM 元素获取 =====
@@ -958,7 +958,7 @@
             options: [],
             answer: buffer.a.trim(),
             correctAnswers: [],
-            analysis: '请核对参考答案'
+            analysis: buffer.a.trim()
         };
     }
 
@@ -1092,23 +1092,32 @@
         elements.essayContainer.style.display = 'none';
         elements.analysisContainer.style.display = 'none';
         
+        // 根据题型设置提交按钮文字和功能
+        if (question.type === 'essay') {
+            elements.submitBtn.textContent = '显示解析';
+            elements.submitBtn.disabled = false; // 简答题总是可以点击
+        } else {
+            elements.submitBtn.textContent = '提交答案';
+            elements.submitBtn.disabled = state.isAnswered;
+        }
+        
         // 渲染选项
         if (question.type === 'choice' || question.type === 'multiple') {
             renderOptions(question);
         } else if (question.type === 'essay') {
             elements.essayContainer.style.display = 'block';
-            elements.essayInput.value = state.userAnswers[state.currentQuestionIndex] || '';
+            // 简答题输入框只是记录用户输入，不与任何逻辑绑定
+            elements.essayInput.value = '';
         }
         
         // 如果已作答，自动显示解析
-        if (state.isAnswered) {
+        if (state.isAnswered && question.type !== 'essay') {
             elements.analysisContainer.style.display = 'block';
             elements.analysisContent.textContent = question.analysis || '暂无解析';
         }
         
-        // 更新按钮状态
+        // 更新导航按钮
         updateNavigationButtons();
-        elements.submitBtn.disabled = state.isAnswered;
     }
     
     // 渲染选项
@@ -1157,41 +1166,59 @@
         elements.scoreText.textContent = `得分: ${state.score}`;
     }
     
-    // 更新导航按钮
+    // 更新导航按钮 - 完全取消禁用逻辑
     function updateNavigationButtons() {
-        elements.prevBtn.disabled = state.currentQuestionIndex === 0;
-        elements.nextBtn.disabled = state.isAnswered && state.currentQuestionIndex === state.questions.length - 1;
+        elements.prevBtn.disabled = false;
+        elements.nextBtn.disabled = false;
         
-        if (!state.isAnswered) {
+        // 依然可以提示用户当前的位置边界，但不禁用
+        if (state.currentQuestionIndex === 0) {
+            elements.prevBtn.disabled = true;
+        }
+        if (state.currentQuestionIndex === state.questions.length - 1) {
             elements.nextBtn.disabled = true;
-        } else if (state.isAnswered && state.currentQuestionIndex < state.questions.length - 1) {
-            elements.nextBtn.disabled = false;
         }
     }
     
-    // 提交答案
-    elements.submitBtn.addEventListener('click', submitAnswer);
+    // 提交答案/显示解析
+    elements.submitBtn.addEventListener('click', handleSubmit);
     
-    function submitAnswer() {
+    function handleSubmit() {
         const question = state.questions[state.currentQuestionIndex];
-        let userAnswer = [];
         
-        if (question.type === 'choice' || question.type === 'multiple') {
-            // 获取选中的选项
-            elements.optionsContainer.querySelectorAll('.option-item.selected').forEach(item => {
-                userAnswer.push(item.querySelector('.option-label').textContent);
-            });
-            
-            if (userAnswer.length === 0) {
-                showToast('请选择答案', 'error');
-                return;
-            }
-        } else if (question.type === 'essay') {
-            userAnswer = elements.essayInput.value.trim();
-            if (!userAnswer) {
-                showToast('请输入答案', 'error');
-                return;
-            }
+        if (question.type === 'essay') {
+            // 简答题：直接显示解析
+            showEssayAnalysis(question);
+        } else {
+            // 选择题：提交答案并检查
+            submitChoiceAnswer(question);
+        }
+    }
+    
+    // 显示简答题解析
+    function showEssayAnalysis(question) {
+        // 简答题只是显示解析，不记录任何状态
+        elements.analysisContainer.style.display = 'block';
+        elements.analysisContent.textContent = question.analysis || '暂无解析';
+        
+        // 按钮变灰防止重复点击
+        elements.submitBtn.disabled = true;
+        
+        // 简答题不计分，不影响分数和进度
+        // 不记录用户答案，不计入统计
+    }
+    
+    // 提交选择题答案
+    function submitChoiceAnswer(question) {
+        // 获取选中的选项
+        let userAnswer = [];
+        elements.optionsContainer.querySelectorAll('.option-item.selected').forEach(item => {
+            userAnswer.push(item.querySelector('.option-label').textContent);
+        });
+        
+        if (userAnswer.length === 0) {
+            showToast('请选择答案', 'error');
+            return;
         }
         
         // 保存答案
@@ -1207,8 +1234,17 @@
         updateNavigationButtons();
         updateProgress();
         
-        // 自动跳转到下一题
-        if (state.currentQuestionIndex < state.questions.length - 1) {
+        // 选择题选错后不自动跳转
+        // 只有选择题答对时才自动跳转
+        let isCorrect = false;
+        if (question.type === 'choice' || question.type === 'multiple') {
+            const sortedUserAnswer = [...userAnswer].sort().join(',');
+            const sortedCorrectAnswer = [...question.correctAnswers].sort().join(',');
+            isCorrect = sortedUserAnswer === sortedCorrectAnswer;
+        }
+        
+        // 只有答对且不是最后一题时才自动跳转
+        if (isCorrect && state.currentQuestionIndex < state.questions.length - 1) {
             state.isAutoNexting = true;
             setTimeout(() => {
                 if (state.isAutoNexting) {
@@ -1218,7 +1254,7 @@
         }
     }
     
-    // 检查答案
+    // 检查答案（仅用于选择题）
     function checkAnswer(question, userAnswer) {
         let isCorrect = false;
         
@@ -1227,9 +1263,6 @@
             const sortedUserAnswer = [...userAnswer].sort().join(',');
             const sortedCorrectAnswer = [...question.correctAnswers].sort().join(',');
             isCorrect = sortedUserAnswer === sortedCorrectAnswer;
-        } else if (question.type === 'essay') {
-            // 简答题简单匹配（实际应用中可优化）
-            isCorrect = userAnswer.toLowerCase().includes(question.answer.toLowerCase().substring(0, 10));
         }
         
         // 更新分数和计数
@@ -1241,7 +1274,7 @@
             state.wrongCount++;
             showToast('回答错误', 'error');
             
-            // 记录错题
+            // 记录错题（仅选择题）
             state.wrongQuestions.push({
                 question: question,
                 userAnswer: userAnswer,
@@ -1279,7 +1312,7 @@
         elements.questionContainer.style.display = 'none';
         elements.resultContainer.style.display = 'block';
         
-        // 更新统计数据
+        // 更新统计数据（简答题不计入）
         elements.resultTotal.textContent = state.questions.length;
         elements.resultCorrect.textContent = state.correctCount;
         elements.resultWrong.textContent = state.wrongCount;
